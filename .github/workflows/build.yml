@@ -1,0 +1,64 @@
+name: Build VibeManager Dylib
+
+on:
+  push:
+    branches: [ main, master, dev, "**" ]
+    tags:
+      - "v*"
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Compile VibeManager.dylib
+        run: |
+          chmod +x build.sh
+          ./build.sh
+          ls -lh VibeManager.dylib
+          file VibeManager.dylib
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: VibeManager-dylib
+          path: |
+            VibeManager.dylib
+            VibeManager.plist
+          if-no-files-found: error
+
+      - name: Release Dylib
+        if: github.event_name != 'pull_request'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if [[ "${{ github.ref }}" == refs/tags/* ]]; then
+            BUILD_TAG="${{ github.ref_name }}"
+          else
+            BUILD_TAG="v${{ github.run_number }}"
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            
+            git tag -f "$BUILD_TAG" HEAD
+            git push origin -f tag "$BUILD_TAG" || true
+            
+            git tag -f latest HEAD
+            git push origin -f tag latest || true
+          fi
+          
+          gh release delete "$BUILD_TAG" --yes || true
+          
+          gh release create "$BUILD_TAG" VibeManager.dylib \
+            VibeManager.plist \
+            --title "VibeManager Build #${{ github.run_number }}" \
+            --notes "Automated build of VibeManager.dylib (commit ${{ github.sha }})." \
+            --latest
