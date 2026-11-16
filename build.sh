@@ -12,15 +12,17 @@ if [ -n "$SDK_PATH" ]; then
         -miphoneos-version-min=14.0 \
         -isysroot "$SDK_PATH" \
         $FRAMEWORKS \
+        -undefined dynamic_lookup \
         -O3 -fobjc-arc -std=c++17 \
-        VibeManager.mm -lc++ \
+        VibeManager.mm \
         -o VibeManager.dylib
 else
     echo "Using direct clang++..."
     clang++ -dynamiclib -target arm64-apple-ios14.0 \
         $FRAMEWORKS \
+        -undefined dynamic_lookup \
         -O3 -fobjc-arc -std=c++17 \
-        VibeManager.mm -lc++ \
+        VibeManager.mm \
         -o VibeManager.dylib
 fi
 
