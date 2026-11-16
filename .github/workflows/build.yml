@@ -20,6 +20,9 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Install ldid
+        run: brew install ldid
+
       - name: Compile VibeManager.dylib
         run: |
           chmod +x build.sh

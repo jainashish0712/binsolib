@@ -26,8 +26,11 @@ else
         -o VibeManager.dylib
 fi
 
-if command -v codesign >/dev/null 2>&1; then
-    echo "Ad-hoc codesigning VibeManager.dylib..."
+if command -v ldid >/dev/null 2>&1; then
+    echo "Fake-signing VibeManager.dylib with ldid..."
+    ldid -S VibeManager.dylib
+elif command -v codesign >/dev/null 2>&1; then
+    echo "Ad-hoc codesigning VibeManager.dylib with codesign..."
     codesign -s - --force VibeManager.dylib || true
 fi
 
