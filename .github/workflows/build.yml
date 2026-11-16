@@ -30,7 +30,7 @@ jobs:
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: VibeManager-dylib
+          name: VibeManager.dylib
           path: |
             VibeManager.dylib
             VibeManager.plist
@@ -47,16 +47,16 @@ jobs:
             BUILD_TAG="v${{ github.run_number }}"
             git config user.name "github-actions[bot]"
             git config user.email "github-actions[bot]@users.noreply.github.com"
-            
+
             git tag -f "$BUILD_TAG" HEAD
             git push origin -f tag "$BUILD_TAG" || true
-            
+
             git tag -f latest HEAD
             git push origin -f tag latest || true
           fi
-          
+
           gh release delete "$BUILD_TAG" --yes || true
-          
+
           gh release create "$BUILD_TAG" VibeManager.dylib \
             VibeManager.plist \
             --title "VibeManager Build #${{ github.run_number }}" \
